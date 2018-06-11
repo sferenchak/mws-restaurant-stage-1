@@ -57,7 +57,13 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  const imgUrlFromDB = DBHelper.imageUrlForRestaurant(restaurant);
+  const imgUrlParts = imgUrlFromDB.split('.');
+  const imgUrl1x = imgUrlParts[0] + '_banner_' + '@1x.' + imgUrlParts[1];
+  const imgUrl2x = imgUrlParts[0] + '_banner_' + '@2x.' + imgUrlParts[1];
+  image.src = imgUrl1x;
+  image.srcset = `${imgUrl1x} 1x, ${imgUrl2x} 2x`;
+  image.alt = restaurant.name + ' restaurant promotional'
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
@@ -139,7 +145,7 @@ createReviewHTML = (review) => {
 /**
  * Add restaurant name to the breadcrumb navigation menu
  */
-fillBreadcrumb = (restaurant=self.restaurant) => {
+fillBreadcrumb = (restaurant = self.restaurant) => {
   const breadcrumb = document.getElementById('breadcrumb');
   const li = document.createElement('li');
   li.innerHTML = restaurant.name;
