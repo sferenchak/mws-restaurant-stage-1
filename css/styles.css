@@ -33,7 +33,7 @@ a {
 }
 a:hover,
 a:focus {
-	color: #3397db;
+	color: orange;
 	text-decoration: none;
 }
 a img{
@@ -66,6 +66,9 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
   color: #fff;
   text-decoration: underline;
 }
+#footer a:focus {
+  color: orange;
+}
 /* ====================== Navigation ====================== */
 nav {
   width: 100%;
@@ -92,6 +95,8 @@ nav h1 a {
   margin: 0;
   width: 100%;
   max-width: 1024px;
+  box-sizing: border-box;
+  text-align: left;
 }
 @media screen and (max-width: 480px) {
   nav h1 a {
@@ -159,7 +164,9 @@ nav h1 a {
   padding: 0 10px;
   width: 200px;
 }
-
+.filter-options select:focus {
+  outline-color: red;
+}
 @media screen and (max-width: 590px) {
   .filter-options h2 {
     margin: 10px auto;
