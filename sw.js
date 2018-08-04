@@ -44,13 +44,13 @@ self.addEventListener('fetch', event => {
 	let cacheRequest = event.request;
 	let requestUrl = new URL(event.request.url);
 
-	console.log('Handling fetch event for', requestUrl);
+	//console.log('Handling fetch event for', requestUrl);
 
 	if (requestUrl.hostname !== 'localhost') {
 		event.request.mode = 'no-cors';
 	}
  	if (requestUrl.origin !== location.origin) {
-		console.log("Skipping non-same-origin item", requestUrl);
+		//console.log("Skipping non-same-origin item", requestUrl);
 		return;
 	}
 	if (requestUrl.href.indexOf('restaurant.html') > -1) {
@@ -61,7 +61,7 @@ self.addEventListener('fetch', event => {
 		caches.match(cacheRequest)
 			.then(response => {
 				if (response) {
-					console.log('Found response in cache:', response);
+					//console.log('Found response in cache:', response);
 					return response
 				}
 
