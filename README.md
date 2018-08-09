@@ -4,8 +4,8 @@
 
 ### Running the site locally
 
-1. Pull down the development API repository from [github](git://github.com/brandy/Restaurant-Reviews.git) and follow directions for starting that server
-2. ###### Within this project directory, install project dependancies
+1. Pull down the development API repository from [github](https://github.com/sferenchak/mws-restaurant-stage-2.git) and follow directions for starting that server
+2. ###### Clone this directory and install project dependancies
 ```Install project dependancies
 # npm i
 ```
