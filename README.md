@@ -4,12 +4,12 @@
 
 ### Running the site locally
 
-1. Pull down the development API repository from [github](https://github.com/sferenchak/mws-restaurant-stage-2.git) and follow directions for starting that server
-2. ###### Clone this directory and install project dependancies
+1. Pull down the development API repository from [github](https://github.com/sferenchak/mws-restaurant-stage-3.git) and follow directions for starting that server
+2. Clone this directory and install project dependancies
 ```Install project dependancies
 # npm i
 ```
-3. ###### Run local server
+3. Run local server
 ``` Run local server
 # npm start
 ```
