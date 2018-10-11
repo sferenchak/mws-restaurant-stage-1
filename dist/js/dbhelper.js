@@ -8,8 +8,12 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
-    const port = 1337 // Change this to your server port
+    const port = 1337; // Change this to your server port
     return `http://localhost:${port}/restaurants`;
+  }
+  static get REVIEWS_URL() {
+    const port = 1337;
+    return `http://localhost:${port}/reviews`;
   }
 
   /**
@@ -25,7 +29,7 @@ class DBHelper {
         response.json()
           .then(restaurants => {
             callback(null, restaurants);
-        })
+          })
       })
       .catch(error => {
         callback(`Fetch failed: ${error}`, null);
@@ -156,6 +160,46 @@ class DBHelper {
   }
 
   /**
+   * Set restaurant as favorite if not favorited already,
+   * otherwise unfavorite.
+   */
+  static toggleFavoriteRestaurant(restaurant, callback) {
+    let fetchURL = `${DBHelper.DATABASE_URL}/${restaurant.id}/?is_favorite=${restaurant.is_favorite}`;
+    fetch(fetchURL, {
+      method: 'PUT',
+      mode: 'cors',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+      .then(response => {
+        response.json()
+          .then(restaurant => {
+            callback(null, restaurant);
+          })
+      })
+      .catch(error => {
+        callback(`Fetch failed: ${error}`, null);
+      });
+  }
+
+  /**
+   * Fetch reviews for a restaurant
+   */
+  static fetchRestaurantReviews(restaurant, callback) {
+    let fetchURL = `${DBHelper.REVIEWS_URL}/?restaurant_id=${restaurant.id}`;
+    fetch(fetchURL)
+      .then(response => {
+        response.json()
+          .then(reviews => {
+            callback(null, reviews);
+          })
+      })
+      .catch(error => {
+        callback(`Fetch failed: ${error}`, null);
+      });
+  }
+  /**
    * Map marker for a restaurant.
    */
   static mapMarkerForRestaurant(restaurant, map) {
@@ -164,7 +208,8 @@ class DBHelper {
       title: restaurant.name,
       url: DBHelper.urlForRestaurant(restaurant),
       map: map,
-      animation: google.maps.Animation.DROP}
+      animation: google.maps.Animation.DROP
+    }
     );
     return marker;
   }

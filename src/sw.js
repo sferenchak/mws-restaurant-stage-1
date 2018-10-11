@@ -67,14 +67,23 @@ self.addEventListener('fetch', event => {
 	const checkURL = new URL(event.request.url);
 	if (checkURL.port === '1337') {
 		const parts = checkURL.pathname.split('/');
-		const id = parts[parts.length - 1] === 'restaurants' ? '-1' : parts[parts.length - 1];
-		sendToIDB(event, id);
+		let id = parts[parts.length - 1] === 'restaurants' ? '-1' : parts[parts.length - 1];
+		if (checkURL.search.includes('is_favorite')) {
+			id = parts[parts.length - 2];
+			console.log(`Toggled Favorite for ${id}`);
+		}
+		if (checkURL.search.includes('restaurant')) {
+			//TODO: Determine best way to send to IDB
+			console.log(`Fetched restaurant reviews ${id}`);
+			return;
+		}
+		sendToRestaurantDB(event, id);
 	} else {
 		sendToCache(event, cacheRequest);
 	}
 });
 
-const sendToIDB = (event, id) => {
+const sendToRestaurantDB = (event, id) => {
 	event.respondWith(
 		dbPromise.then(db => {
 			return db.transaction('restaurants')

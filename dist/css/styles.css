@@ -208,9 +208,9 @@ nav h1 a {
   padding: 0 15px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-evenly;
   min-height: 175px;
-  max-height: 175px;
+  /* max-height: 175px; */
 }
 .restaurant-information h2 {
   color: #8F3900;
@@ -227,9 +227,13 @@ nav h1 a {
   font-size: 1em;
 }
 .restaurant-information p:last-of-type {
-  flex: 1;
+  flex: 1 1 3em;
 }
-.restaurant-information button {
+.restaurant-information .button-wrapper {
+  display: flex;
+  flex-direction: column-reverse;
+}
+.restaurant-information .button-wrapper button {
   background-color: #8F3900;
   border: none;
   border-bottom: 3px solid #eee;

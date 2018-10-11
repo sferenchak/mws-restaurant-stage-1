@@ -1,4 +1,4 @@
-importScripts('js/idb.js');
+/* importScripts('js/idb.js');
 
 var staticCacheName = 'restaurant-static-v1';
 const staticDBName = 'restaurant-store';
@@ -131,3 +131,4 @@ self.addEventListener('fetch', event => {
 		}
 	}
 });
+ */
