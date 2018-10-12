@@ -199,6 +199,32 @@ class DBHelper {
         callback(`Fetch failed: ${error}`, null);
       });
   }
+
+  /**
+   * Send a Review to the API
+   */
+  static sendRestaurantReview(params, callback) {
+    let fetchURL =  DBHelper.REVIEWS_URL;
+    fetch(fetchURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      redirect: "manual", // manual, *follow, error
+      body: JSON.stringify(params), // body data type must match "Content-Type" header 
+    })
+    .then(response => {
+      response.json()
+      .then(review => {
+        const btn = document.getElementById('submitReview');
+        btn.removeAttribute('disabled');
+        callback(null, review);
+      })
+    })
+    .catch(error => {
+      callback(`Fetch failed: ${error}`, null);
+    })
+  }
   /**
    * Map marker for a restaurant.
    */

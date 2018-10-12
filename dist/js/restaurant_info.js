@@ -73,7 +73,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // Fetch restaurant reviews
-  DBHelper.fetchRestaurantReviews(window.restaurant, (error, reviews) => {
+  DBHelper.fetchRestaurantReviews(restaurant, (error, reviews) => {
     if (error) { // Got an error!
       console.error(error);
     } else {
@@ -124,6 +124,53 @@ fillReviewsHTML = (reviews) => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
+
+  // Create form for submitting new Reviews
+  const form = document.createElement('form');
+  form.method = 'POST';
+
+  form.innerHTML = `<h3>Add a Review</h3>
+  <fieldset>
+  <div>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name">
+  </div>
+  <div>
+    <label for="rating">Rating:</label>
+    <input type="number" id="rating" name="rating" step="1" min="0" max="5" placeholder="Rating from 0-5">
+  </div>
+  <div>
+    <label for="comments">Comment:</label>
+    <textarea id="comments" name="comments"></textarea>
+  </div>
+  <button id="submitReview" type="submit">Submit</button>
+  </fieldset>`
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const name = document.getElementById('name').value;
+    const rating = document.getElementById('rating').value;
+    const comments = document.getElementById('comments').value;
+    if (name !== "" && rating !== "" && comments !== "") {
+      const params = {
+        'restaurant_id': self.restaurant.id,
+        name,
+        rating,
+        comments
+      }
+      DBHelper.sendRestaurantReview(params, (error, review) => {
+        if (error) {
+          console.log('Error sending Review');
+        }
+        const btn = document.getElementById('submitReview');
+        btn.setAttribute('disabled', false);
+        console.log(`Review from sendRestaurantReview(): ${review}`);
+        window.location.href = `/restaurant.html?id=${self.restaurant.id}`;
+      })
+    } else {
+      //TODO: handle invalid form
+    }
+  });
+  container.appendChild(form);
 }
 
 /**

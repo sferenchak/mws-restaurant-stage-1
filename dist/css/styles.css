@@ -246,6 +246,10 @@ nav h1 a {
   text-decoration: none;
   text-transform: uppercase;
   cursor: pointer;
+  transition: background-color 0.25s ease-in-out;
+}
+.restaurant-information .button-wrapper button:hover {
+  background-color: #5f2701;
 }
 @media screen and (min-width: 0px) {
   #restaurants-list li {
@@ -368,4 +372,63 @@ nav h1 a {
   #restaurant-hours {
     width: 100%;
   }
+}
+
+/* ====================== Review Form ====================== */
+form{
+    max-width: 500px;
+    background: #fff;
+    margin: 10px auto;
+    padding: 20px;
+    border: 2px solid #f3f3f3;
+}
+form fieldset{
+    border: none;
+}
+form label {
+    display: block;
+    margin-bottom: 8px;
+}
+form input[type="text"],
+form input[type="number"],
+form textarea {
+    background: rgba(255,255,255,.1);
+    border: none;
+    font-size: 16px;
+    margin: 0 0 15px 0;
+    outline: 0;
+    padding: 7px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box; 
+    background-color: #e8eeef;
+    color:#333;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03) inset;
+}
+form textarea {
+  resize: vertical;
+}
+form input[type="text"]:focus,
+form input[type="number"]:focus,
+form textarea:focus {
+    background: #d2d9dd;
+}
+form button {
+  background-color: #8F3900;
+  border: none;
+  border-bottom: 3px solid #eee;
+  color: #fff;
+  display: inline-block;
+  width: 100%;
+  font-size: 0.9em;
+  margin: 15px 0 0;
+  padding: 8px 30px 10px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.25s ease-in-out;
+}
+form button:hover {
+  background-color: #5f2701;
 }

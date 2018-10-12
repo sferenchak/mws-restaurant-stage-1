@@ -77,6 +77,11 @@ self.addEventListener('fetch', event => {
 			console.log(`Fetched restaurant reviews ${id}`);
 			return;
 		}
+		if (parts[parts.length - 1] === 'reviews') {
+			//TODO: Handle these review posts if offline
+			console.log(`Sent a review!`);
+			return;
+		}
 		sendToRestaurantDB(event, id);
 	} else {
 		sendToCache(event, cacheRequest);
