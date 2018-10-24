@@ -176,22 +176,12 @@ createRestaurantHTML = (restaurant) => {
   buttonWrapper.className = 'button-wrapper';
   figcaption.append(buttonWrapper);
 
-  // Add the button that brings the user to the restaurant info page
-  const more = document.createElement('button');
-  more.innerHTML = 'View Details';
-  more.setAttribute('aria-label', `View Details for ${restaurant.name}`);
-  more.onclick = () => {
-    const url = DBHelper.urlForRestaurant(restaurant);
-    window.location = url;
-  }
-  buttonWrapper.append(more)
-
   // Add Favorite button
   const favorite = document.createElement('button');
   if (restaurant.is_favorite.toString() == 'false') {
     favorite.innerHTML = 'Favorite ☆';
     favorite.setAttribute('aria-label', `Set ${restaurant.name} as a favorite`)
-  } 
+  }
   else {
     favorite.innerHTML = 'Unfavorite ★';
     favorite.setAttribute('aria-label', `Remove ${restaurant.name} from favorites`);
@@ -207,6 +197,16 @@ createRestaurantHTML = (restaurant) => {
     })
   }
   buttonWrapper.append(favorite);
+
+  // Add the button that brings the user to the restaurant info page
+  const more = document.createElement('button');
+  more.innerHTML = 'View Details';
+  more.setAttribute('aria-label', `View Details for ${restaurant.name}`);
+  more.onclick = () => {
+    const url = DBHelper.urlForRestaurant(restaurant);
+    window.location = url;
+  }
+  buttonWrapper.append(more)
   
   return li
 }

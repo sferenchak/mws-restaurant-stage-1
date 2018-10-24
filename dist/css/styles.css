@@ -231,7 +231,7 @@ nav h1 a {
 }
 .restaurant-information .button-wrapper {
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
 }
 .restaurant-information .button-wrapper button {
   background-color: #8F3900;
