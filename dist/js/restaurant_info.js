@@ -163,7 +163,8 @@ fillReviewsHTML = (reviews) => {
         }
         const btn = document.getElementById('submitReview');
         btn.setAttribute('disabled', false);
-        console.log(`Review from sendRestaurantReview(): ${review}`);
+        console.log(`Review from sendRestaurantReview():`);
+        console.log(review);
         window.location.href = `/restaurant.html?id=${self.restaurant.id}`;
       })
     } else {
