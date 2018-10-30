@@ -2,7 +2,7 @@ importScripts('js/idb.js');
 
 var staticCacheName = 'restaurant-static-v1';
 const staticDBName = 'restaurant-store';
-const dbVersion = 1;
+const dbVersion = 2;
 const dbStoreName = 'restaurants';
 
 const dbPromise = idb.open(staticDBName, dbVersion, upgradeDB => {
@@ -73,7 +73,9 @@ self.addEventListener('fetch', event => {
     if (checkURL.search.includes('is_favorite')) {
       id = parts[parts.length - 2];
     }
-    if (checkURL.search.includes('restaurant')) {
+    // if url is looking for the reviews for a restaurant, send them
+    // to the reviews DB and make sure to send the id as a Number
+    if (checkURL.search.includes('restaurant_id')) {
       id = Number(checkURL.search.split('=').pop());
       sendToReviewDB(event, id);
       return;
@@ -98,11 +100,8 @@ const sendToReviewDB = (event, id) => {
         .getAll(id);
     })
       .then(data => {
-        console.log(data);
         return (
-          //TODO: figure out how to send back out the data properly
-          // data gives an "an object that was not a Response was passed to respondWith()."" error...
-          (data) ||
+          (data.length > 0 ? data : false) ||
           fetch(event.request)
             .then(fetchResponse => fetchResponse.json())
             .then(json => {
@@ -116,17 +115,16 @@ const sendToReviewDB = (event, id) => {
                 newJson.forEach(review => {
                   tx.objectStore('reviews').put(review);
                 })
-                console.log(newJson);
                 return newJson;
               });
             })
-            .then(finalResponse => {
-              return new Response(JSON.stringify(finalResponse));
-            })
-            .catch(error => {
-              return new Response(`Error fetching review data: ${error}`, { status: 500 });
-            })
-        )
+        );
+      })
+      .then(finalResponse => {
+        return new Response(JSON.stringify(finalResponse));
+      })
+      .catch(error => {
+        return new Response(`Error fetching review data: ${error}`, { status: 500 });
       })
   )
 };
