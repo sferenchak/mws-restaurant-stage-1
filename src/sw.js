@@ -1,17 +1,20 @@
 importScripts('js/idb.js');
 
+Array.prototype.isArray = true;
 var staticCacheName = 'restaurant-static-v1';
 const staticDBName = 'restaurant-store';
-const dbVersion = 2;
-const dbStoreName = 'restaurants';
+const dbVersion = 3;
+var form_params;
 
 const dbPromise = idb.open(staticDBName, dbVersion, upgradeDB => {
   switch (upgradeDB.oldVersion) {
     case 0:
-      upgradeDB.createObjectStore(dbStoreName, { keyPath: 'id' });
+      upgradeDB.createObjectStore('restaurants', { keyPath: 'id' });
     case 1:
       upgradeDB.createObjectStore('reviews', { keyPath: 'id' })
         .createIndex('reviewsByRestaurant_id', 'restaurant_id');
+    case 2:
+      upgradeDB.createObjectStore('offlineReview', { autoIncrement: true });
   }
 });
 
@@ -54,6 +57,13 @@ self.addEventListener('activate', event => {
   );
 });
 
+self.addEventListener('message', event => {
+  //console.log(event.data.form_params);
+  if (event.data.hasOwnProperty('form_params')) {
+    form_params = event.data.form_params;
+  }
+});
+
 self.addEventListener('fetch', event => {
   let cacheRequest = event.request;
   let requestUrl = new URL(cacheRequest.url);
@@ -69,20 +79,19 @@ self.addEventListener('fetch', event => {
   const checkURL = new URL(event.request.url);
   if (checkURL.port === '1337') {
     const parts = checkURL.pathname.split('/');
-    let id = parts[parts.length - 1] === 'restaurants' ? '-1' : parts[parts.length - 1];
+    let id = parts[parts.length - 1] === 'restaurants' ? -1 : parseInt(parts[parts.length - 1]);
     if (checkURL.search.includes('is_favorite')) {
-      id = parts[parts.length - 2];
+      id = parseInt(parts[parts.length - 2]);
     }
     // if url is looking for the reviews for a restaurant, send them
     // to the reviews DB and make sure to send the id as a Number
     if (checkURL.search.includes('restaurant_id')) {
-      id = Number(checkURL.search.split('=').pop());
+      id = parseInt(checkURL.search.split('=').pop());
       sendToReviewDB(event, id);
       return;
     }
-    if (parts[parts.length - 1] === 'reviews') {
-      //TODO: Handle these review posts if offline
-      console.log(`Sent a review!`);
+    if (event.request.method === 'POST') {
+      sendToTempReviewDB(event);
       return;
     }
     sendToRestaurantDB(event, id);
@@ -91,9 +100,28 @@ self.addEventListener('fetch', event => {
   }
 });
 
+const sendToTempReviewDB = (event) => {
+  event.respondWith(
+    fetch(event.request)
+      .then(fetchResponse => fetchResponse.json())
+      .then(finalResponse => {
+        return new Response(JSON.stringify(finalResponse));
+      })
+      .catch(error => {
+        // add to IDB if fetch errors out
+        dbPromise.then(db => {
+          const tx = db.transaction('offlineReview', 'readwrite');
+          tx.objectStore('offlineReview').put(form_params);
+          return new Response(`Error posting review data: ${error}. Added to IDB.`, { status: 500 });
+        })
+      })
+  )
+};
+
 const sendToReviewDB = (event, id) => {
   event.respondWith(
     dbPromise.then(db => {
+      // get all restaurants for the restaurant_id passed in
       return db.transaction('reviews')
         .objectStore('reviews')
         .index('reviewsByRestaurant_id')
@@ -109,7 +137,7 @@ const sendToReviewDB = (event, id) => {
                 const tx = db.transaction('reviews', 'readwrite');
                 const newJson = json.map(obj => {
                   let temp = Object.assign({}, obj);
-                  temp.restaurant_id = Number(temp.restaurant_id);
+                  temp.restaurant_id = parseInt(temp.restaurant_id);
                   return temp;
                 });
                 newJson.forEach(review => {
@@ -132,22 +160,35 @@ const sendToReviewDB = (event, id) => {
 const sendToRestaurantDB = (event, id) => {
   event.respondWith(
     dbPromise.then(db => {
-      return db.transaction('restaurants')
-        .objectStore(dbStoreName)
-        .get(id);
+      if (id < 0) {
+        return db.transaction('restaurants')
+          .objectStore('restaurants')
+          .getAll();
+      } else {
+        return db.transaction('restaurants')
+          .objectStore('restaurants')
+          .get(parseInt(id));
+      }
     })
       .then(data => {
+        console.log(data);
         return (
-          (data && data.data) ||
+          // if the data is an array AND has length > 1 OR data.id exists 
+          // send back data from IDB, otherwise go to network
+          (data.isArray && data.length > 0 || data.id ? data : false) ||
           fetch(event.request)
             .then(fetchResponse => fetchResponse.json())
             .then(json => {
               return dbPromise.then(db => {
                 const tx = db.transaction('restaurants', 'readwrite');
-                tx.objectStore('restaurants').put({
-                  id: id,
-                  data: json
-                });
+                // don't store all restaurants as a single entry
+                if (id < 0) {
+                  json.forEach(restaurant => {
+                    tx.objectStore('restaurants').put(restaurant);
+                  })
+                } else {
+                  tx.objectStore('restaurants').put(json);
+                }
                 return json;
               });
             })

@@ -203,14 +203,21 @@ class DBHelper {
    * Send a Review to the API
    */
   static sendRestaurantReview(params, callback) {
+    // send message to service worker with params
+    var msg = {
+      'form_params': params
+    };
+    navigator.serviceWorker.controller.postMessage(msg);
+
+    // perform the fetch request
     let fetchURL = DBHelper.REVIEWS_URL;
     fetch(fetchURL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json; charset=utf-8",
       },
-      redirect: "manual", // manual, *follow, error
-      body: JSON.stringify(params), // body data type must match "Content-Type" header 
+      redirect: "manual",
+      body: JSON.stringify(params),
     })
       .then(response => {
         response.json()
@@ -224,6 +231,7 @@ class DBHelper {
         callback(`Fetch failed: ${error}`, null);
       })
   }
+
   /**
    * Map marker for a restaurant.
    */
