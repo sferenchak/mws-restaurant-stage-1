@@ -155,19 +155,20 @@ fillReviewsHTML = (reviews) => {
         'restaurant_id': self.restaurant.id,
         name,
         rating,
-        comments
+        comments,
+        createdAt: Date.now()
       }
-      DBHelper.sendRestaurantReview(params, (error, review) => {
+      DBHelper.sendRestaurantReview(params, (error) => {
         if (error) {
-          console.log('Error sending Review');
+          console.log(`Error sending Review ${error}`);
         }
         const btn = document.getElementById('submitReview');
         btn.setAttribute('disabled', false);
-        console.log(`Review from sendRestaurantReview(): ${review}`);
+        //navigate to the current restaurant info page
         window.location.href = `/restaurant.html?id=${self.restaurant.id}`;
       })
     } else {
-      //TODO: handle invalid form
+      //TODO: handle invalid form data
     }
   });
   container.appendChild(form);

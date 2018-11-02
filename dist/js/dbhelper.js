@@ -45,7 +45,6 @@ class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        //const restaurant = restaurants.find(r => r.id == id);
         const restaurant = restaurants;
         if (restaurant) { // Got the restaurant
           callback(null, restaurant);
@@ -204,27 +203,35 @@ class DBHelper {
    * Send a Review to the API
    */
   static sendRestaurantReview(params, callback) {
-    let fetchURL =  DBHelper.REVIEWS_URL;
+    // send message to service worker with params
+    let msg = {
+      'form_params': params
+    };
+    navigator.serviceWorker.controller.postMessage(msg);
+
+    // perform the fetch request
+    let fetchURL = DBHelper.REVIEWS_URL;
     fetch(fetchURL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json; charset=utf-8",
       },
-      redirect: "manual", // manual, *follow, error
-      body: JSON.stringify(params), // body data type must match "Content-Type" header 
+      redirect: "manual",
+      body: JSON.stringify(params),
     })
-    .then(response => {
-      response.json()
-      .then(review => {
-        const btn = document.getElementById('submitReview');
-        btn.removeAttribute('disabled');
-        callback(null, review);
+      .then(response => {
+        response.json()
+          .then(review => {
+            const btn = document.getElementById('submitReview');
+            btn.removeAttribute('disabled');
+            callback(null, review);
+          })
       })
-    })
-    .catch(error => {
-      callback(`Fetch failed: ${error}`, null);
-    })
+      .catch(error => {
+        callback(`Fetch failed: ${error}`, null);
+      })
   }
+
   /**
    * Map marker for a restaurant.
    */

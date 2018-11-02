@@ -8,4 +8,9 @@ if ('serviceWorker' in navigator) {
 		.catch(error => {
 			console.log('Registration failed: ' + error);
 		});
+
+	// setup sync
+	navigator.serviceWorker.ready.then(swRegistration => {
+		return swRegistration.sync.register('reviewSync')
+	})
 }

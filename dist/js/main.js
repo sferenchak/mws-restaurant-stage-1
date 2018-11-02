@@ -215,7 +215,7 @@ createRestaurantHTML = (restaurant) => {
  * Update favorite UI when toggled
  */
 updateFavoriteUI = (event, restaurant) => {
-  if (restaurant.is_favorite == 'false') {
+  if (restaurant.is_favorite == 'true') {
     event.target.innerHTML = 'Favorite ☆';
     event.target.setAttribute('aria-label', `Set ${restaurant.name} as a favorite`)
   }
