@@ -204,7 +204,7 @@ class DBHelper {
    */
   static sendRestaurantReview(params, callback) {
     // send message to service worker with params
-    var msg = {
+    let msg = {
       'form_params': params
     };
     navigator.serviceWorker.controller.postMessage(msg);

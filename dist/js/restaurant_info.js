@@ -155,9 +155,10 @@ fillReviewsHTML = (reviews) => {
         'restaurant_id': self.restaurant.id,
         name,
         rating,
-        comments
+        comments,
+        createdAt: Date.now()
       }
-      DBHelper.sendRestaurantReview(params, (error, review) => {
+      DBHelper.sendRestaurantReview(params, (error) => {
         if (error) {
           console.log(`Error sending Review ${error}`);
         }

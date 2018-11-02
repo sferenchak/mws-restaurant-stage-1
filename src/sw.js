@@ -1,10 +1,10 @@
 importScripts('js/idb.js');
 
 Array.prototype.isArray = true;
-var staticCacheName = 'restaurant-static-v1';
+const staticCacheName = 'restaurant-static-v1';
 const staticDBName = 'restaurant-store';
 const dbVersion = 3;
-var form_params;
+let form_params;
 
 const dbPromise = idb.open(staticDBName, dbVersion, upgradeDB => {
   switch (upgradeDB.oldVersion) {
@@ -58,9 +58,11 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('message', event => {
-  //console.log(event.data.form_params);
   if (event.data.hasOwnProperty('form_params')) {
     form_params = event.data.form_params;
+  }
+  if (event.data.hasOwnProperty('restaurant')) {
+    
   }
 });
 
@@ -80,6 +82,7 @@ self.addEventListener('fetch', event => {
   if (checkURL.port === '1337') {
     const parts = checkURL.pathname.split('/');
     let id = parts[parts.length - 1] === 'restaurants' ? -1 : parseInt(parts[parts.length - 1]);
+    // trying to toggle is_favorite
     if (checkURL.search.includes('is_favorite')) {
       id = parseInt(parts[parts.length - 2]);
     }
@@ -90,6 +93,7 @@ self.addEventListener('fetch', event => {
       sendToReviewDB(event, id);
       return;
     }
+    // Posting a review
     if (event.request.method === 'POST') {
       sendToTempReviewDB(event);
       return;
@@ -129,7 +133,7 @@ const sendToReviewDB = (event, id) => {
     })
       .then(data => {
         return (
-          (data.length > 0 ? data : false) ||
+          (data && data.length > 0 ? data : false) ||
           fetch(event.request)
             .then(fetchResponse => fetchResponse.json())
             .then(json => {
@@ -171,11 +175,10 @@ const sendToRestaurantDB = (event, id) => {
       }
     })
       .then(data => {
-        console.log(data);
         return (
           // if the data is an array AND has length > 1 OR data.id exists 
           // send back data from IDB, otherwise go to network
-          (data.isArray && data.length > 0 || data.id ? data : false) ||
+          (data && (data.isArray && data.length > 1) || data && data.id ? data : false) ||
           fetch(event.request)
             .then(fetchResponse => fetchResponse.json())
             .then(json => {
