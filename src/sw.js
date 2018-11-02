@@ -1,4 +1,5 @@
 importScripts('js/idb.js');
+importScripts('js/dbhelper.js')
 
 Array.prototype.isArray = true;
 const staticCacheName = 'restaurant-static-v1';
@@ -61,10 +62,36 @@ self.addEventListener('message', event => {
   if (event.data.hasOwnProperty('form_params')) {
     form_params = event.data.form_params;
   }
-  if (event.data.hasOwnProperty('restaurant')) {
-
-  }
 });
+
+self.addEventListener('sync', event => {
+  if (event.tag == 'reviewSync') {
+    event.waitUntil(
+      dbPromise.then(db => {
+        return db.transaction('offlineReview')
+          .objectStore('offlineReview')
+          .getAll();
+      }).then(reviews => {
+        return Promise.all(reviews.map(async review => {
+          const response = await fetch(DBHelper.REVIEWS_URL, {
+            method: 'POST',
+            body: JSON.stringify(review),
+            headers: {
+              "Content-Type": "application/json; charset=utf-8",
+            }
+          });
+          const data = await response.json();
+          if (data.result === 'success') {
+            dbPromise.then(db => {
+              return db.transaction('offlineReview', 'readwrite')
+                .objectStore('offlineReview').delete(review.createdAt);
+            });
+          }
+        }))
+      }).catch(error => { console.error(error); })
+    )
+  }
+})
 
 self.addEventListener('fetch', event => {
   let cacheRequest = event.request;
@@ -130,28 +157,25 @@ const sendToReviewDB = (event, id) => {
         .objectStore('reviews')
         .index('reviewsByRestaurant_id')
         .getAll(id);
-    })
-      .then(data => {
-        return (
-          (data && data.length > 0 ? data : false) ||
-          fetch(event.request)
-            .then(fetchResponse => fetchResponse.json())
-            .then(json => {
-              return dbPromise.then(db => {
-                const tx = db.transaction('reviews', 'readwrite');
-                const newJson = json.map(obj => {
-                  let temp = Object.assign({}, obj);
-                  temp.restaurant_id = parseInt(temp.restaurant_id);
-                  return temp;
-                });
-                newJson.forEach(review => {
-                  tx.objectStore('reviews').put(review);
-                })
-                return newJson;
-              });
+    }).then(data => {
+      let networkFetch = fetch(event.request)
+        .then(fetchResponse => fetchResponse.clone().json())
+        .then(json => {
+          return dbPromise.then(db => {
+            const tx = db.transaction('reviews', 'readwrite');
+            const newJson = json.map(obj => {
+              let temp = Object.assign({}, obj);
+              temp.restaurant_id = parseInt(temp.restaurant_id);
+              return temp;
+            });
+            newJson.forEach(review => {
+              tx.objectStore('reviews').put(review);
             })
-        );
-      })
+            return newJson;
+          });
+        })
+      return (data && data.length > 0 ? data : false) || networkFetch;
+    })
       .then(finalResponse => {
         return new Response(JSON.stringify(finalResponse));
       })
