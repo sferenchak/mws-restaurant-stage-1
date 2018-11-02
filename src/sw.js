@@ -62,7 +62,7 @@ self.addEventListener('message', event => {
     form_params = event.data.form_params;
   }
   if (event.data.hasOwnProperty('restaurant')) {
-    
+
   }
 });
 
@@ -173,30 +173,25 @@ const sendToRestaurantDB = (event, id) => {
           .objectStore('restaurants')
           .get(parseInt(id));
       }
+    }).then(data => {
+      let networkFetch = fetch(event.request)
+        .then(fetchResponse => fetchResponse.clone().json())
+        .then(json => {
+          return dbPromise.then(db => {
+            const tx = db.transaction('restaurants', 'readwrite');
+            // don't store all restaurants as a single entry
+            if (id < 0) {
+              json.forEach(restaurant => {
+                tx.objectStore('restaurants').put(restaurant);
+              })
+            } else {
+              tx.objectStore('restaurants').put(json);
+            }
+            return json;
+          });
+        })
+      return (data && (data.isArray && data.length > 1) || data && data.id ? data : false) || networkFetch;
     })
-      .then(data => {
-        return (
-          // if the data is an array AND has length > 1 OR data.id exists 
-          // send back data from IDB, otherwise go to network
-          (data && (data.isArray && data.length > 1) || data && data.id ? data : false) ||
-          fetch(event.request)
-            .then(fetchResponse => fetchResponse.json())
-            .then(json => {
-              return dbPromise.then(db => {
-                const tx = db.transaction('restaurants', 'readwrite');
-                // don't store all restaurants as a single entry
-                if (id < 0) {
-                  json.forEach(restaurant => {
-                    tx.objectStore('restaurants').put(restaurant);
-                  })
-                } else {
-                  tx.objectStore('restaurants').put(json);
-                }
-                return json;
-              });
-            })
-        );
-      })
       .then(finalResponse => {
         return new Response(JSON.stringify(finalResponse));
       })
